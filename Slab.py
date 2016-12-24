@@ -51,6 +51,11 @@ class Slab:
         if len(complexString3dNodes)==0: complexString3dNodes=node.getElementsByTagName('Contour')
         self.curve=Curve().getNode(complexString3dNodes[0])
         return self
+    def center(self):
+        R1=self.curve.center()
+        R2=copy.deepcopy(self.normal)
+        R2.scale(0.5*self.thickness)
+        return R1+R2
     def toWall(self):
         w=Wall()
         w.name=self.name+'wall'
@@ -69,6 +74,7 @@ class Slab:
             
             
             line=line.translate(dr,0.5)
+            #line.out()
             w.curve.lines.append(line)
             w.height=deep
             w.thickness=dr.mag()
@@ -86,7 +92,9 @@ class Slab:
                 start=Vector((min.x+max.x)/2,min.y,min.z)
                 end=Vector((min.x+max.x)/2,max.y,min.z)
                 thick=diag.x
-            w.curve.lines.append(Line(start,end))
+            line=Line(start,end)
+            
+            w.curve.lines.append(line)
             w.height=diag.z
             w.thickness=thick
         return w

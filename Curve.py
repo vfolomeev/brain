@@ -29,8 +29,8 @@ from prim import Vector,Line,Arc,Circle
 
 class Curve:
     'List of lines for skatch definition ComplexString3d'
-    def __init__(self,lines=[]):
-        self.lines=lines
+    def __init__(self):
+        self.lines=[]
     
     def getNode(self,node):
          self.lines=[]
@@ -68,21 +68,31 @@ class Curve:
                     line1.extend(dist1)
                     line2.extend(dist2)
                     print('intersected')
-            if dist1<1 and dist1>0:
-                 if dist2<1 and dist2>0:
+                    return True
+                else : return False
+            elif dist1<1 and dist1>0:
+                if dist2<1 and dist2>0:
                     self.lines.append(self.split(point))
                     other.lines.append(other.split(point))
-                    print('splited') 
-            if dist1<1 and dist1>0:
+                    print('splited')
+                    return True
+                else : return False
+            elif dist1<1 and dist1>0:
                 if (-tol<dist2 and dist2<0) or (1<dist2 and dist2 <(tol+1)):
                     self.lines.append(self.split(point))
                     line2.extend(dist2)
                     print('partialy')
-            if dist2<1 and dist2>0:
+                    return True
+                else : return False    
+            elif dist2<1 and dist2>0:
                 if (-tol<dist1 and dist1<0) or (1<dist1 and dist1 <(tol+1)):
                     other.lines.append(other.split(point))
                     line1.extend(dist1)
                     print('partialy')
+                    return True
+                else : return False
+            else: return False
+        else :return False
         
     
     
@@ -107,7 +117,7 @@ class Curve:
         l=self.lines
         l0=l[0]
         if isinstance(l0,Line):
-            
+            print(l0.dr().mag())
             Pstart=l0.start.gpP()
             Pend=l0.end.gpP()
             pol= BRepBuilderAPI_MakePolygon(Pstart,Pend)

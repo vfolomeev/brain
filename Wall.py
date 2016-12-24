@@ -36,6 +36,7 @@ class Wall:
         self.thickness=0
         self.height=0
         self.curve=Curve()
+        self.connections=[]
     def getNode(self,node):
         nameNodes=node.getElementsByTagName('OID')
         self.name=nameNodes[0].firstChild.nodeValue
@@ -52,6 +53,12 @@ class Wall:
         if len(complexString3dNodes)==0: self.curve=Curve().getNode(pathNodes[0])
         else:self.curve=Curve().getNode(complexString3dNodes[0])
         return self
+    def isSplitable(self):
+        if len(self.curve.lines)>1: return True
+        else: return False
+    def isSingular(self,tol):
+        if self.curve.lines[0].dr().mag()<tol : return True
+        else : return False
     def split(self) :
         listofNewWalls=[]
         i=0
@@ -67,8 +74,11 @@ class Wall:
         
         return listofNewWalls
     def intersect(self,other,tol):
-        self.curve.intersect(other.curve,tol)
-                
+        flag=self.curve.intersect(other.curve,tol)
+        if flag: 
+            self.connections.append(other)
+            other.connections.append(self)
+        return flag        
        
     def out(self):
         print ("name=",self.name)
@@ -83,14 +93,14 @@ class Wall:
         R2.scale(0.5*self.height)
         return R1+R2
     def draw(self,display,c):
+        #self.out()
         pol=self.curve.polygon()
         if pol!=None:
             pol=pol.Wire()
             n=Vector(0,0,1)
             n.scale(self.height)
             n=n.gpV()
-            #face=BRepBuilderAPI_MakeFace(pol,True).Face()
-#my_shell = BRepPrimAPI_MakePrism(my_pol,n1).Shape() 
+            
             prism = BRepPrimAPI_MakePrism(pol,n).Shape()
             if c==0: color='YELLOW'
             elif c==1: color='BLUE'
@@ -102,29 +112,7 @@ class Wall:
             else: color='ORANGE'
             display.DisplayColoredShape(prism,color, update=True)
 
-#        l=self.curve.lines[0]
-#        if isinstance(l,Line):
-#            p1=copy.copy(l.start)
-#            h=Vector(0,0,1)
-#            h.scale(self.height)
-#            t=l.dr()
-#            t.scale(1/t.mag())
-#            n=t*Vector(0,0,1)
-#            tDir=gp_Dir(t.x,t.y,t.z)
-#            nDir=gp_Dir(n.x,n.y,n.z)
-#            
-#            P1=gp_Pnt(p1.x,p1.y,p1.z)
-#            axis=gp_Ax2(P1,tDir,nDir)
-#            if c==0: color='YELLOW'
-#            elif c==1: color='BLUE'
-#            elif c==2: color='GREEN'
-#            elif c==3: color='BLACK'
-#            elif c==4: color='RED'
-#            elif c==5: color='WHITE'
-#            elif c==6: color='CYAN'
-#            else: color='ORANGE'
-#            my_box = BRepPrimAPI_MakeBox(axis,0.001,self.height,l.dr().mag()).Shape()
-#            display.DisplayColoredShape(my_box,color, update=True)
+#        
             
             
     
